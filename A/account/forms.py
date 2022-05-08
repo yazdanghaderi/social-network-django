@@ -29,3 +29,7 @@ class UserRegisterationForm(forms.Form):
         password2 = cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
             raise ValidationError("passwords is not match")
+
+class UserLoginForm(forms.Form):
+     username = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
+     password = forms.CharField(label="password", widget=forms.PasswordInput(attrs={'class':'form-control'}))
