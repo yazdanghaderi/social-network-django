@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.views import View
 from .models import Post
 from django.contrib import messages
-from .forms import PostUpdateForm
+from .forms import PostCreateAndUpdateForm
 from django.utils.text import slugify
 
 class HomeView(View):
@@ -32,7 +32,7 @@ class PostDeleteView(LoginRequiredMixin, View):
 
 class PostUpdateView(LoginRequiredMixin, View):
     login_url = 'account:user_login'
-    form_class = PostUpdateForm
+    form_class = PostCreateAndUpdateForm
 
     def setup(self, request, *args, **kwargs):
         self.post_instance = Post.objects.get(id=kwargs["post_id"])
@@ -61,3 +61,20 @@ class PostUpdateView(LoginRequiredMixin, View):
             messages.success(request, "you updated this post", 'success')
             return redirect("home:post_detail", post.id,post.slug)
 
+class PostCreateView(LoginRequiredMixin, View):
+    login_url = 'account:user_login'
+    form_class = PostCreateAndUpdateForm
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class()
+        return render(request, "home/create.html", context={"form":form})
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            new_post = form.save(commit=False)
+            new_post.slug = slugify(form.cleaned_data['body'][:30])
+            new_post.user = request.user
+            new_post.save()
+            messages.success(request, "you create this post", 'success')
+            return redirect("home:post_detail", new_post.id, new_post.slug)
