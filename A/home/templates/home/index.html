@@ -3,6 +3,7 @@
 
 {% block content%}
 <div class="card">
+    <h3>{{ request.user.username }}</h3>
     {% for post in posts%}
         <a href="{{ post.get_absolute_url }}" class="card-body">{{ post.body|truncatewords:3 }}</a>
     {%endfor%}
