@@ -25,9 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-r@9_c$56jh_lopmcbq3g$!mbqj7*3m5^t1e=l4!+4p9kinsby@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -126,3 +126,14 @@ STATIC_URL = 'static/'
 AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend',
                            'account.authenticate.EmailBackend']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+# google account
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'yazdanghaderi70@gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_PASSWORD = "cjqwrlzsmhhurzbz"
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'diako social network'
