@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import views as auth_views
 from home.models import Post
+from .models import Relation
 # Create your views here.
 
 
@@ -72,9 +73,13 @@ class UserLogout(LoginRequiredMixin, View):
 class UserProfileView(LoginRequiredMixin, View):
     login_url = 'account:user_login'
     def get(self, request, pid):
+        is_following = False
         user = User.objects.get(id=pid)
-        posts = Post.objects.filter(user=user)
-        return render(request, "account/profile.html", context={"user":user, "posts":posts})
+        posts = user.postss.all()
+        relation = Relation.objects.filter(from_user=request.user, to_user = user)
+        if relation.exists():
+            is_following = True
+        return render(request, "account/profile.html", context={"user":user, "posts":posts, "is_following": is_following})
 
 class UserPasswordResetView(auth_views.PasswordResetView):
     template_name = "account/password_reset_form.html"
@@ -91,3 +96,31 @@ class UserPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
 
 class UserPassowrdResetCompleteView(auth_views.PasswordResetCompleteView):
     template_name = "account/password_reset_complete.html"
+
+
+class UserFollowView(LoginRequiredMixin, View):
+    login_url = 'account:user_login'
+    def get(self, request, user_id):
+        user = User.objects.get(id=user_id)
+        relation = Relation.objects.filter(from_user=request.user, to_user = user)
+        if relation.exists():
+            messages.success(request, "you already follows this page.", "success")
+        else:
+            Relation(from_user=request.user, to_user = user).save()
+            messages.success(request, "you followed this page", "success")
+        return redirect("account:user_profile", user.id)
+
+
+class UserUnfollowView(LoginRequiredMixin, View):
+    login_url = 'account:user_login'
+    def get(self, request, user_id):
+        user = User.objects.get(id=user_id)
+        relation = Relation.objects.filter(from_user=request.user, to_user = user)
+        if relation.exists():
+            relation.delete()
+            messages.success(request, "you unfollow this page.", "success")
+        else:
+            messages.error(request, "you followed this page", "danger")
+        return redirect("account:user_profile", user.id)
+
+
