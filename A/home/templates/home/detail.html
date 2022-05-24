@@ -5,7 +5,7 @@
         <a href="{% url 'home:post_delete' post.id %}" class="btn btn-danger"> Delete </a>
         <a href="{% url 'home:post_update' post.id %}" class="btn btn-info"> Update </a>
     {% endif %}
+    <a href="{% url 'account:user_profile' post.user.id %}"> {{post.user.username}}</a>
 
-    <p>{{post.user.username}}</p>
     <p>{{post.body}}</p>
 {% endblock %}

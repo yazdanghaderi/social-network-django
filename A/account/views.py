@@ -39,6 +39,10 @@ class UserLogin(View):
     form_class = UserLoginForm
     template_name ="account/login.html"
 
+    def setup(self, request, *args, **kwargs):
+        self.next = request.GET.get("next")
+        return super().setup(request, *args, **kwargs)
+
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return redirect("home:home")
@@ -57,6 +61,8 @@ class UserLogin(View):
                 login(request, user)
                 ms = cd["username"] + " is login"
                 messages.success(request, ms , "success")
+                if self.next:
+                    return redirect(self.next)
                 return redirect("home:home")
             messages.success(request, "user info is not correct", "warning")
         return render(request, self.template_name, context={"form":form})
