@@ -1,10 +1,12 @@
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
+from django.utils.decorators import method_decorator
 from django.views import View
 from .models import Post
 from django.contrib import messages
-from .forms import PostCreateAndUpdateForm
+from .forms import PostCreateAndUpdateForm, CommentCreateForm
 from django.utils.text import slugify
 
 class HomeView(View):
@@ -13,10 +15,23 @@ class HomeView(View):
         return render(request, "home/index.html", context={"posts":posts})
 
 class PostDetailView(View):
-    def get(self, request, post_id, post_slug):
-        post = Post.objects.get(id=post_id, slug=post_slug)
-        return  render(request, "home/detail.html", {"post":post})
+    form_class = CommentCreateForm
 
+    def setup(self, request, *args, **kwargs):
+        self.post_instance = get_object_or_404(Post, pk=kwargs["post_id"], slug=kwargs["post_slug"])
+        return super().setup(request, *args, **kwargs)
+    def get(self, request, post_id, post_slug):
+        comment = self.post_instance.Pcomment.filter(is_reply=False)
+        return  render(request, "home/detail.html", {"post":self.post_instance, "comments":comment, "form":self.form_class})
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            new_commit  = form.save(commit=False)
+            new_commit.user = request.user
+            new_commit.post = self.post_instance
+            new_commit.save()
+            return redirect("home:post_detail", self.post_instance.id, self.post_instance.slug)
 
 
 class PostDeleteView(LoginRequiredMixin, View):
