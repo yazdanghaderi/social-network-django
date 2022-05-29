@@ -12,7 +12,7 @@
             {% csrf_token %}
             {{form.as_p}}
             <input type="submit" value="send">
-        </form>
+        </form><br/>
     {% else %}
         <p class="alert alert-danger">for leave a commnet you should be loggind.</p>
     {% endif %}
@@ -20,7 +20,22 @@
         <div class="card-body bg-dark text-white">
             <p class="header">{{comment.user}} | {{comment.created|timesince}}</p>
             <p class="card-body">{{comment.body}}</p>
-        </div>
+            {% if request.user.is_authenticated %}
+            <form action="{% url 'home:add_reply' post.id comment.id %}" method="post">
+                {% csrf_token %}
+                {{reply_form.as_p}}
+                <input type="submit" value="send">
+             </form><br/>
+            {% endif %}
+
+
+            {% with replies=comment.rcomments.all %}
+            {% for reply in replies %}
+                <p class="bg-primary p-3 m-2">{{reply.user}}<br/>{{ reply.body }}</p>
+            {% endfor %}
+            {% endwith %}
+        </div><br/>
+
     {% empty %}
         <p>No Comment</p>
     {% endfor%}
