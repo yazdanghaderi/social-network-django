@@ -4,6 +4,11 @@
 {% block content%}
 <div class="card">
     <h3>{{ request.user.username }}</h3>
+    <form action="" method="get">
+        {{form.as_p}}
+        <input type="Submit" value="Search">
+    </form>
+    <br/><br/>
     {% for post in posts%}
         <a href="{{ post.get_absolute_url }}" class="card-body">{{ post.body|truncatewords:3 }}</a>
     {%endfor%}

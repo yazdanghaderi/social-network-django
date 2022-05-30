@@ -6,13 +6,16 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from .models import Post, Comment, Vote
 from django.contrib import messages
-from .forms import PostCreateAndUpdateForm, CommentCreateForm, CommentReplyForm
+from .forms import PostCreateAndUpdateForm, CommentCreateForm, CommentReplyForm, PostSearchForm
 from django.utils.text import slugify
 
 class HomeView(View):
+    form_class = PostSearchForm
     def get(self, request):
         posts = Post.objects.all()
-        return render(request, "home/index.html", context={"posts":posts})
+        if request.GET.get("Search"):
+            posts = posts.filter(body__contains=request.GET["Search"])
+        return render(request, "home/index.html", context={"posts":posts, "form":self.form_class})
 
 class PostDetailView(View):
     form_class = CommentCreateForm
